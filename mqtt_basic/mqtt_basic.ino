@@ -2,8 +2,8 @@
  Basic MQTT example 
  
   - connects to an MQTT server
-  - publishes "hello world" to the topic "outTopic"
-  - subscribes to the topic "inTopic"
+  - publishes sensor data to the topic "outTopic"
+  
 */
 
 #include <SPI.h>
