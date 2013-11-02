@@ -22,7 +22,7 @@ byte server[] = { 10, 217, 2, 1 };
 // these constants won't change:
 const int ledPin = 13;      // led connected to digital pin 13
 const int knockSensor = A0; // the piezo is connected to analog pin 0
-const int threshold = 15;  // threshold value to decide when the detected sound is a knock or not-Original 100
+const int threshold = 50;  // threshold value to decide when the detected sound is a knock or not-Original 100
 int sensorReading = 0;      // variable to store the value read from the sensor pin
 
 void callback(char* topic, byte* payload, unsigned int length) {
@@ -59,7 +59,7 @@ void setup()
   
   if (client.connect("arduinoClient")) {
     //client.publish("public/laundarypal","hello world-from Jay");
-    client.publish("public/laundarypal","\"info\":\"bootup\"");
+    client.publish("public/laundarypal/1","{\"info\":\"bootup\"}");
     //client.subscribe("inTopic"); 
   }
   
@@ -83,7 +83,11 @@ void loop()
  }
  
  //Vibration started, send Start message
- client.publish("public/laundarypal","\"started\":true");
+ while(!client.publish("public/laundarypal/1","{\"started\":true}"))
+  {
+   Serial.println("Failed to send start");
+   client.connect("arduinoClient");
+ }
  Serial.println("Started");
  //Keep looping till sensor value is lower than the threshold 
  do
@@ -105,7 +109,7 @@ void loop()
  do
  {
    count=0;
-   for(loop_count=20; loop_count>0; loop_count--)
+   for(loop_count=60; loop_count>0; loop_count--)
    {
      sensorReading = analogRead(knockSensor);   
      if(sensorReading == 0)
@@ -115,10 +119,14 @@ void loop()
       }
      delay(100);
    }
- }while(count != 20);
+ }while(count != 60);
  
  //Vibration Stopped-Send Update
- client.publish("public/laundarypal","\"started\":false");
+ while(!client.publish("public/laundarypal/1","{\"started\":false}"))
+ {
+   Serial.println("Failed to send stop");
+   client.connect("arduinoClient");
+ }
  Serial.println("Stopped"); 
 }
 
